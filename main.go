@@ -84,7 +84,7 @@ func execCommandAndGetResponse(command string, args ...string) string {
 		return "<pre>" + errorHtml + "</pre>"
 	} else {
 		output := string(out.Bytes())
-		output = strings.Replace(output, "\nOK\n", "", 1)
+		output = strings.Replace(output, "\r\nOK\r\n", "", 1)
 		output = strings.Trim(output, "\r\n \t")
 		return "<pre>" + output + "</pre>"
 	}
