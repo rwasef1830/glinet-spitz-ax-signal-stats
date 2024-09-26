@@ -43,7 +43,7 @@ type Svc struct {
 	// some stuff here
 }
 
-func (s *Svc) HandleRequest(ctx *gserv.Context) gserv.Response {
+func (s *Svc) HandleRequest(*gserv.Context) gserv.Response {
 	html := `
 <!DOCTYPE html>
 <html>
@@ -55,18 +55,36 @@ func (s *Svc) HandleRequest(ctx *gserv.Context) gserv.Response {
 </body>
 </html>`
 
-	cmd := exec.Command("gl_modem", "-D", "AT", "AT+QCAINFO")
+	finalOutput := ""
+
+	var commandOutputs []string
+	commandOutputs = append(commandOutputs, execAtCommandAndGetResponse("AT+QCAINFO"))
+	commandOutputs = append(commandOutputs, execAtCommandAndGetResponse("AT+QENG=\"servingcell\""))
+	commandOutputs = append(commandOutputs, execAtCommandAndGetResponse("AT+QENG=\"neighbourcell\""))
+	commandOutputs = append(commandOutputs, execAtCommandAndGetResponse("AT+QNWCFG=\"up\""))
+	commandOutputs = append(commandOutputs, execAtCommandAndGetResponse("AT+QNWCFG=\"down\""))
+
+	finalOutput = strings.Join(commandOutputs, "\n<br />\n")
+	html = strings.Replace(html, "[placeholder]", finalOutput, 1)
+
+	return gserv.PlainResponse("text/html", html)
+}
+
+func execAtCommandAndGetResponse(command string) string {
+	return execCommandAndGetResponse("gl_model", "-D", "AT", command)
+}
+
+func execCommandAndGetResponse(command string, args ...string) string {
+	cmd := exec.Command(command, args...)
 	var out bytes.Buffer
 	cmd.Stdout = &out
 
 	err := cmd.Run()
 	if err != nil {
 		errorHtml := fmt.Sprint("Error:", err)
-		html = strings.Replace(html, "[placeholder]", "<pre>"+errorHtml+"</pre>", 1)
+		return "<pre>" + errorHtml + "</pre>"
 	} else {
 		output := string(out.Bytes())
-		html = strings.Replace(html, "[placeholder]", "<pre>"+output+"</pre>", 1)
+		return "<pre>" + output + "</pre>"
 	}
-
-	return gserv.PlainResponse("text/html", html)
 }
