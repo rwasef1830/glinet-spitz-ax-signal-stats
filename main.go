@@ -61,8 +61,7 @@ func (s *Svc) HandleRequest(*gserv.Context) gserv.Response {
 	commandOutputs = append(commandOutputs, execAtCommandAndGetResponse("AT+QCAINFO"))
 	commandOutputs = append(commandOutputs, execAtCommandAndGetResponse("AT+QENG=\"servingcell\""))
 	commandOutputs = append(commandOutputs, execAtCommandAndGetResponse("AT+QENG=\"neighbourcell\""))
-	commandOutputs = append(commandOutputs, execAtCommandAndGetResponse("AT+QNWCFG=\"up\""))
-	commandOutputs = append(commandOutputs, execAtCommandAndGetResponse("AT+QNWCFG=\"down\""))
+	commandOutputs = append(commandOutputs, execAtCommandAndGetResponse("AT+QNWCFG=\"up/down\""))
 
 	finalOutput = strings.Join(commandOutputs, "\n<br />\n")
 	html = strings.Replace(html, "[placeholder]", finalOutput, 1)
